@@ -10,8 +10,8 @@ const api = axios.create({
   }
 });
 
-// Servicios de Citas
-export const citaService = {
+// ==================== SERVICIOS DE CITAS ====================
+const citaService = {
   // POST /citas - Agendar nueva cita
   agendarCita: async (citaData) => {
     try {
@@ -65,9 +65,9 @@ export const citaService = {
   }
 };
 
-// Servicios de Médicos
-export const medicoService = {
-  // GET /api/medicos - Listar todos activos
+// ==================== SERVICIOS DE MÉDICOS ====================
+const medicoService = {
+  // GET /medicos - Listar todos activos
   listarTodos: async () => {
     try {
       const response = await api.get('/medicos');
@@ -77,7 +77,7 @@ export const medicoService = {
     }
   },
 
-  // GET /api/medicos/especialidad/:id - Por especialidad
+  // GET /medicos/especialidad/:id - Por especialidad
   listarPorEspecialidad: async (especialidadId) => {
     try {
       const response = await api.get(`/medicos/especialidad/${especialidadId}`);
@@ -87,7 +87,7 @@ export const medicoService = {
     }
   },
 
-  // GET /api/medicos/:id - Uno específico
+  // GET /medicos/:id - Uno específico
   obtenerUno: async (medicoId) => {
     try {
       const response = await api.get(`/medicos/${medicoId}`);
@@ -95,12 +95,32 @@ export const medicoService = {
     } catch (error) {
       throw error.response?.data || { message: error.message };
     }
+  },
+
+  // POST /medicos - Crear nuevo médico
+  crearMedico: async (medicoData) => {
+    try {
+      const response = await api.post('/medicos', medicoData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: error.message };
+    }
+  },
+
+  // PUT /medicos/:id - Actualizar médico
+  actualizarMedico: async (medicoId, medicoData) => {
+    try {
+      const response = await api.put(`/medicos/${medicoId}`, medicoData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: error.message };
+    }
   }
 };
 
-// Servicios de Especialidades
-export const especialidadService = {
-  // GET /api/especialidades - Lista todas
+// ==================== SERVICIOS DE ESPECIALIDADES ====================
+const especialidadService = {
+  // GET /especialidades - Lista todas
   listarTodas: async () => {
     try {
       const response = await api.get('/especialidades');
@@ -110,7 +130,7 @@ export const especialidadService = {
     }
   },
 
-  // GET /api/especialidades/conteo - Con cantidad de médicos
+  // GET /especialidades/conteo - Con cantidad de médicos
   conConteo: async () => {
     try {
       const response = await api.get('/especialidades/conteo');
@@ -120,7 +140,7 @@ export const especialidadService = {
     }
   },
 
-  // GET /api/especialidades/:id - Una específica con sus médicos
+  // GET /especialidades/:id - Una específica con sus médicos
   obtenerUna: async (especialidadId) => {
     try {
       const response = await api.get(`/especialidades/${especialidadId}`);
@@ -128,7 +148,44 @@ export const especialidadService = {
     } catch (error) {
       throw error.response?.data || { message: error.message };
     }
+  },
+
+  // POST /especialidades - Crear nueva especialidad
+  crearEspecialidad: async (especialidadData) => {
+    try {
+      const response = await api.post('/especialidades', especialidadData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: error.message };
+    }
   }
 };
 
+// ==================== SERVICIOS DE AUTENTICACIÓN ====================
+const authService = {
+  // POST /auth/login - Iniciar sesión
+  login: async (email, password) => {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: error.message };
+    }
+  },
+
+  // GET /auth/verificar-email - Verificar si email existe
+  verificarEmail: async (email) => {
+    try {
+      const response = await api.get('/auth/verificar-email', {
+        params: { email }
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: error.message };
+    }
+  }
+};
+
+// ==================== EXPORTACIONES ====================
+export { authService, citaService, medicoService, especialidadService };
 export default api;
