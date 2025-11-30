@@ -5,7 +5,6 @@ Sistema modular, escalable y **totalmente funcional** que automatiza la gestión
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.12-orange.svg)](https://www.rabbitmq.com/)
 
 ---
 
@@ -16,13 +15,12 @@ Sistema modular, escalable y **totalmente funcional** que automatiza la gestión
 ### ✅ Características Clave
 
 - 🎯 **Sistema 100% Funcional** - No requiere hardware Arduino, usa simulador de datos realistas
-- 🏗️ **Arquitectura SOA y Microservicios** - 4 servicios independientes con responsabilidades únicas
-- 📨 **Message Broker (RabbitMQ)** - Comunicación asíncrona y desacoplada
+- 🏗️ **Arquitectura Microservicios** - 4 servicios independientes con responsabilidades únicas
+- 🌐 **Comunicación HTTP/REST** - APIs simples y eficientes entre servicios
 - 🔐 **Autenticación JWT** - Seguridad robusta con tokens
 - 📊 **Análisis Inteligente** - Detección automática de anomalías y generación de alertas
 - 🔔 **Sistema de Notificaciones** - Alertas en tiempo real (SMS/Email simulados)
-- 🎨 **Dashboard Web** - Interfaz moderna y responsive (React)
-- 📝 **Código Profesional** - Documentado, modularizado y siguiendo mejores prácticas
+- 📝 **Código Simple** - Dependencias mínimas, fácil de instalar y ejecutar
 
 ---
 
@@ -40,11 +38,11 @@ Cada servicio con:
 - ✅ Deployment autónomo
 - ✅ Responsabilidad única
 
-#### 3. **Message Broker (RabbitMQ)**
-Comunicación asíncrona mediante colas de mensajes:
-- `sensor.data.received`: Sensor Service → Analysis Service
-- `alert.generated`: Analysis Service → Notification Service
-- `notification.sent`: Notification Service → Dashboard
+#### 3. **Comunicación HTTP/REST**
+Comunicación directa entre servicios mediante APIs REST:
+- Sensor Service → Analysis Service (POST /api/analizar)
+- Analysis Service → Notification Service (POST /api/notificar)
+- Cada servicio expone endpoints RESTful independientes
 
 ### Servicios
 
@@ -72,10 +70,10 @@ Comunicación asíncrona mediante colas de mensajes:
 git clone <repository-url>
 cd clinica-harimoto
 
-# 2. Levantar infraestructura (PostgreSQL, RabbitMQ, Redis)
-docker-compose up -d
+# 2. Levantar infraestructura (solo PostgreSQL)
+docker-compose up -d postgres
 
-# Esperar ~30 segundos a que los servicios estén listos
+# Esperar ~15 segundos a que PostgreSQL esté listo
 # Verificar: docker-compose ps
 
 # 3. Instalar dependencias y ejecutar cada servicio

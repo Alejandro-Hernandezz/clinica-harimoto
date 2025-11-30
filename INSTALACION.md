@@ -1,14 +1,18 @@
-# 🚀 GUÍA DE INSTALACIÓN - RIEGO-SMART
+# 🚀 GUÍA DE INSTALACIÓN - RIEGO-SMART (VERSIÓN SIMPLIFICADA)
+
+## ✅ ARQUITECTURA SIMPLIFICADA
+
+Esta versión usa **comunicación HTTP/REST** entre servicios (sin RabbitMQ), con dependencias mínimas y configuración sencilla.
 
 ## PROBLEMA COMÚN: Módulos no encontrados
 
 Si al ejecutar los servicios ves errores como:
 ```
-Error: Cannot find module 'amqplib'
-Error: Cannot find module 'jsonwebtoken'
+Error: Cannot find module 'express'
+Error: Cannot find module 'sequelize'
 ```
 
-**Solución:** Necesitas instalar las dependencias de cada servicio.
+**Solución:** Ejecuta `npm install` en cada servicio (ver abajo).
 
 ---
 
@@ -56,10 +60,10 @@ npm install
 ### 1. Levantar Infraestructura (Docker)
 
 ```bash
-docker-compose up -d
+docker-compose up -d postgres
 ```
 
-Espera ~30 segundos a que PostgreSQL y RabbitMQ estén listos.
+Espera ~15 segundos a que PostgreSQL esté listo.
 
 **Verificar:**
 ```bash
@@ -68,8 +72,8 @@ docker-compose ps
 
 Deberías ver:
 - `riego-smart-postgres` - RUNNING
-- `riego-smart-rabbitmq` - RUNNING
-- `riego-smart-redis` - RUNNING
+
+**Nota:** Esta versión simplificada solo requiere PostgreSQL. No necesitas RabbitMQ ni Redis.
 
 ### 2. Instalar Dependencias
 
@@ -180,16 +184,6 @@ docker-compose up -d postgres
 docker-compose logs postgres
 ```
 
-### Error: Cannot connect to RabbitMQ
-
-**Problema:** RabbitMQ no está corriendo.
-
-**Solución:**
-```bash
-docker-compose up -d rabbitmq
-docker-compose logs rabbitmq
-```
-
 ### Puerto ya en uso
 
 **Problema:** Un servicio ya está corriendo en ese puerto.
@@ -217,9 +211,9 @@ npm install
 
 ---
 
-## 📝 DEPENDENCIAS NECESARIAS
+## 📝 DEPENDENCIAS NECESARIAS (SIMPLIFICADAS)
 
-Cada servicio necesita:
+Cada servicio necesita **solo estas dependencias básicas**:
 
 | Dependencia | Versión | Uso |
 |-------------|---------|-----|
@@ -227,11 +221,13 @@ Cada servicio necesita:
 | sequelize | ^6.35.1 | ORM para PostgreSQL |
 | pg | ^8.11.3 | Driver PostgreSQL |
 | pg-hstore | ^2.3.4 | Serialización JSONB |
-| amqplib | ^0.10.3 | Cliente RabbitMQ |
-| jsonwebtoken | ^9.0.2 | Autenticación JWT |
-| bcrypt | ^5.1.1 | Hash de passwords |
+| jsonwebtoken | ^9.0.2 | Autenticación JWT (auth, sensor, analysis, notification) |
+| bcrypt | ^5.1.1 | Hash de passwords (solo auth) |
+| axios | ^1.6.2 | HTTP client (solo sensor y analysis) |
 | cors | ^2.8.5 | CORS |
 | dotenv | ^16.3.1 | Variables de entorno |
+
+**NOTA:** Ya NO se usa `amqplib` (RabbitMQ). Los servicios se comunican por HTTP/REST.
 
 ---
 
@@ -239,11 +235,12 @@ Cada servicio necesita:
 
 - [ ] Node.js 18+ instalado
 - [ ] Docker y Docker Compose instalados
-- [ ] `docker-compose up -d` ejecutado
-- [ ] Dependencias instaladas en los 4 servicios
+- [ ] `docker-compose up -d postgres` ejecutado
+- [ ] PostgreSQL corriendo (verificar con `docker-compose ps`)
+- [ ] Dependencias instaladas en los 4 servicios (`npm install`)
 - [ ] 4 terminales abiertas con los servicios corriendo
 - [ ] Todos los servicios muestran "✅ escuchando en puerto..."
-- [ ] RabbitMQ Management accesible en http://localhost:15672
+- [ ] Cada servicio responde en su endpoint /health
 
 ---
 
