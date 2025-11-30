@@ -20,8 +20,8 @@ app.use(express.json());
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'sensor_service',
-  process.env.DB_USER || 'riego_admin',
-  process.env.DB_PASSWORD || 'riego_password_2024',
+  process.env.DB_USER || 'postgres',
+  process.env.DB_PASSWORD || 'postgres',
   {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
