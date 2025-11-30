@@ -1,0 +1,74 @@
+INSTRUCCIONES INSTALACION - RIEGO SMART
+
+PASO 1: Crear bases de datos en pgAdmin
+----------------------------------------
+1. Abre pgAdmin: http://localhost:5050
+2. Login: admin@riego-smart.com / admin_password_2024
+3. Conecta al servidor PostgreSQL:
+   - Host: localhost
+   - Puerto: 5432
+   - Usuario: postgres
+   - Password: Adezito666
+4. Abre Query Tool (icono de rayo)
+5. Copia y pega el contenido del archivo: setup-db.sql
+6. Ejecuta (F5)
+
+
+PASO 2: Instalar dependencias
+------------------------------
+Ejecuta: install-all.bat
+
+Esto instalara todas las dependencias de los 4 servicios.
+Tarda aproximadamente 2-3 minutos.
+
+
+PASO 3: Iniciar servicios
+--------------------------
+Ejecuta: start-all.bat
+
+Se abriran 4 ventanas CMD, una por cada servicio:
+- Auth Service (puerto 3000)
+- Sensor Service (puerto 3001)
+- Analysis Service (puerto 3002)
+- Notification Service (puerto 3003)
+
+
+VERIFICAR QUE FUNCIONA
+----------------------
+En cada ventana debes ver:
+"Conectado a BD"
+"BD sincronizada"
+"escuchando en puerto XXXX"
+
+Si ves estos mensajes, TODO FUNCIONA CORRECTAMENTE.
+
+
+PROBAR EL SISTEMA
+-----------------
+Abre otra terminal CMD y ejecuta:
+
+curl http://localhost:3000/health
+curl http://localhost:3001/health
+curl http://localhost:3002/health
+curl http://localhost:3003/health
+
+Si cada uno responde con JSON, todo esta funcionando.
+
+
+DETENER SERVICIOS
+-----------------
+Cierra las 4 ventanas CMD o presiona Ctrl+C en cada una.
+
+
+PROBLEMAS COMUNES
+-----------------
+Error de conexion a BD:
+- Verifica que PostgreSQL este corriendo (pgAdmin debe conectarse)
+- Verifica que creaste las 4 bases de datos con setup-db.sql
+
+Error "Cannot find module":
+- Ejecuta install-all.bat de nuevo
+
+Puerto ocupado:
+- Cierra cualquier aplicacion en puertos 3000-3003
+- O cambia los puertos en los archivos app-simple.js
