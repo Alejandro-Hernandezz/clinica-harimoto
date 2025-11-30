@@ -3,20 +3,26 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const config = require('../../../config');
 
 const app = express();
-const PORT = 3001;
+const PORT = config.ports.sensor;
 
 app.use(cors());
 app.use(express.json());
 
 // BASE DE DATOS
-const sequelize = new Sequelize('sensor_service', 'postgres', 'Adezito666', {
-  host: 'localhost',
-  port: 5432,
-  dialect: 'postgres',
-  logging: false
-});
+const sequelize = new Sequelize(
+  config.database.databases.sensor,
+  config.database.user,
+  config.database.password,
+  {
+    host: config.database.host,
+    port: config.database.port,
+    dialect: 'postgres',
+    logging: false
+  }
+);
 
 // MODELOS
 const Sensor = sequelize.define('Sensor', {
@@ -42,7 +48,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, 'riego_smart_secret_2024');
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
     next();
   } catch (error) {
@@ -96,9 +102,8 @@ app.post('/api/sensores/:id/simular', authenticate, async (req, res) => {
     const valor = sensor.tipo === 'HUMEDAD' ? generarHumedad() : generarTemperatura();
     const dato = await SensorData.create({ sensorId: sensor.id, valor });
 
-    // Notificar a Analysis Service
     try {
-      await axios.post('http://localhost:3002/api/analizar', {
+      await axios.post('http://localhost:' + config.ports.analysis + '/api/analizar', {
         sensorId: sensor.id,
         usuarioId: sensor.usuarioId,
         valor,
@@ -131,6 +136,7 @@ app.get('/api/sensores/:id/datos', authenticate, async (req, res) => {
 });
 
 // INICIO
+console.log('Conectando a:', config.database.databases.sensor);
 sequelize.authenticate()
   .then(() => {
     console.log('Conectado a BD');
@@ -143,6 +149,7 @@ sequelize.authenticate()
     });
   })
   .catch(err => {
-    console.error('Error:', err.message);
+    console.error('ERROR:', err.message);
+    console.error('Edita config.js con tus credenciales');
     process.exit(1);
   });
