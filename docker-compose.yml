@@ -7,7 +7,7 @@ services:
     container_name: riego-smart-postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: Adezito666
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
