@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: riego-smart-postgres
     environment:
-      POSTGRES_USER: riego_admin
-      POSTGRES_PASSWORD: riego_password_2024
-      POSTGRES_DB: riego_smart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Adezito666
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
@@ -17,7 +17,7 @@ services:
     networks:
       - riego-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U riego_admin"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
