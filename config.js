@@ -1,15 +1,14 @@
-// CONFIGURACION UNICA DEL SISTEMA
-// EDITA ESTE ARCHIVO CON TUS CREDENCIALES REALES
+// CONFIGURACION UNICA - MYSQL
 
 module.exports = {
-  // CREDENCIALES DE TU POSTGRESQL
+  // MYSQL - Mas simple que PostgreSQL
   database: {
     host: 'localhost',
-    port: 5432,
-    user: 'postgres',           // CAMBIA ESTO si tu usuario es diferente
-    password: 'Adezito666',     // CAMBIA ESTO con tu password real
+    port: 3306,
+    user: 'root',              // Usuario por defecto de MySQL
+    password: '',              // CAMBIA ESTO: tu password de MySQL (puede estar vacio)
 
-    // Nombres de las bases de datos (NO cambies estos)
+    // Nombres de las bases de datos
     databases: {
       auth: 'auth_service',
       sensor: 'sensor_service',

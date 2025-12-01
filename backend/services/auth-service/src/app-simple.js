@@ -11,7 +11,7 @@ const PORT = config.ports.auth;
 app.use(cors());
 app.use(express.json());
 
-// BASE DE DATOS - Lee credenciales del config.js
+// MYSQL DATABASE
 const sequelize = new Sequelize(
   config.database.databases.auth,
   config.database.user,
@@ -19,7 +19,7 @@ const sequelize = new Sequelize(
   {
     host: config.database.host,
     port: config.database.port,
-    dialect: 'postgres',
+    dialect: 'mysql',
     logging: false
   }
 );
@@ -41,7 +41,6 @@ const User = sequelize.define('User', {
   }
 });
 
-// MIDDLEWARE AUTH
 const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -54,7 +53,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// RUTAS
 app.get('/health', (req, res) => {
   res.json({ success: true, service: 'auth-service', port: PORT });
 });
@@ -92,31 +90,24 @@ app.get('/api/auth/profile', authenticate, async (req, res) => {
   }
 });
 
-// INICIO
-console.log('Intentando conectar a PostgreSQL...');
+console.log('Conectando a MySQL...');
 console.log('Host:', config.database.host);
-console.log('Puerto:', config.database.port);
 console.log('Usuario:', config.database.user);
 console.log('Base de datos:', config.database.databases.auth);
 
-sequelize.authenticate()
+sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a BD');
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    console.log('BD sincronizada');
+    console.log('Conectado a MySQL y BD sincronizada');
     app.listen(PORT, () => {
       console.log('Auth Service escuchando en puerto ' + PORT);
     });
   })
   .catch(err => {
-    console.error('ERROR DE CONEXION:');
-    console.error('Mensaje:', err.message);
+    console.error('ERROR:', err.message);
     console.error('');
     console.error('SOLUCION:');
-    console.error('1. Verifica que PostgreSQL este corriendo');
-    console.error('2. Edita el archivo config.js con tus credenciales correctas');
-    console.error('3. Asegura que la base de datos "' + config.database.databases.auth + '" exista');
+    console.error('1. Verifica que MySQL este corriendo');
+    console.error('2. Edita config.js con tu password de MySQL');
+    console.error('3. Crea la base de datos: CREATE DATABASE ' + config.database.databases.auth + ';');
     process.exit(1);
   });

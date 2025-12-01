@@ -1,30 +1,43 @@
-# RIEGO-SMART
+# RIEGO-SMART - Sistema con MySQL
 
-## CONFIGURACION (SOLO UNA VEZ)
+## PASO 1: Edita config.js
 
-### 1. Edita el archivo `config.js` con tus credenciales:
-
-Abre `config.js` y cambia estas lineas si es necesario:
+Abre `config.js` y configura:
 ```javascript
-user: 'postgres',           // Tu usuario de PostgreSQL
-password: 'Adezito666',     // Tu password de PostgreSQL
+user: 'root',        // Tu usuario MySQL (generalmente 'root')
+password: '',        // Tu password MySQL (puede estar vacio)
 ```
 
-### 2. Crea las 4 bases de datos
+## PASO 2: Inicia MySQL
 
-Abre CMD y ejecuta:
+Opcion A - Si tienes MySQL instalado localmente:
+Ya esta listo, solo verifica que este corriendo.
+
+Opcion B - Con Docker:
 ```cmd
-docker-compose exec postgres createdb -U TU_USUARIO auth_service
-docker-compose exec postgres createdb -U TU_USUARIO sensor_service
-docker-compose exec postgres createdb -U TU_USUARIO analysis_service
-docker-compose exec postgres createdb -U TU_USUARIO notification_service
+docker-compose up -d mysql
 ```
 
-Reemplaza TU_USUARIO con tu usuario real de PostgreSQL.
+## PASO 3: Crea las bases de datos
 
-### 3. Instala dependencias
+Abre MySQL y ejecuta:
+```sql
+CREATE DATABASE auth_service;
+CREATE DATABASE sensor_service;
+CREATE DATABASE analysis_service;
+CREATE DATABASE notification_service;
+```
 
-En la raiz del proyecto:
+O desde CMD:
+```cmd
+mysql -u root -p -e "CREATE DATABASE auth_service;"
+mysql -u root -p -e "CREATE DATABASE sensor_service;"
+mysql -u root -p -e "CREATE DATABASE analysis_service;"
+mysql -u root -p -e "CREATE DATABASE notification_service;"
+```
+
+## PASO 4: Instala dependencias
+
 ```cmd
 cd backend\services\auth-service && npm install && cd ..\..\..
 cd backend\services\sensor-service && npm install && cd ..\..\..
@@ -32,49 +45,29 @@ cd backend\services\analysis-service && npm install && cd ..\..\..
 cd backend\services\notification-service && npm install && cd ..\..\..
 ```
 
-## INICIAR EL SISTEMA
+## PASO 5: Inicia los servicios
 
-Abre 4 terminales CMD y ejecuta en cada una:
+Abre 4 terminales CMD:
 
-Terminal 1:
-```cmd
-cd backend\services\auth-service
-node src\app-simple.js
+Terminal 1: `cd backend\services\auth-service && node src\app-simple.js`
+Terminal 2: `cd backend\services\sensor-service && node src\app-simple.js`
+Terminal 3: `cd backend\services\analysis-service && node src\app-simple.js`
+Terminal 4: `cd backend\services\notification-service && node src\app-simple.js`
+
+Debes ver en cada terminal:
+```
+Conectado a MySQL
+Auth/Sensor/Analysis/Notification Service escuchando en puerto XXXX
 ```
 
-Terminal 2:
-```cmd
-cd backend\services\sensor-service
-node src\app-simple.js
-```
+## VENTAJAS DE MYSQL
 
-Terminal 3:
-```cmd
-cd backend\services\analysis-service
-node src\app-simple.js
-```
-
-Terminal 4:
-```cmd
-cd backend\services\notification-service
-node src\app-simple.js
-```
-
-## VERIFICAR
-
-En cada terminal debes ver:
-```
-Conectado a BD
-BD sincronizada
-escuchando en puerto XXXX
-```
+- Sin problemas de autenticacion
+- Password puede estar vacio por defecto
+- Mas facil de configurar
+- Las tablas se crean automaticamente
 
 ## SI TIENES ERROR
 
-El error mas comun es credenciales incorrectas.
-
-1. Abre `config.js`
-2. Cambia `user` y `password` con tus credenciales reales
-3. Reinicia los servicios
-
-Los servicios ahora muestran mensajes de error mas claros indicando que edites config.js
+El unico error posible es credenciales incorrectas.
+Edita `config.js` con tu usuario/password real de MySQL.
