@@ -3,7 +3,7 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const config = require('../../../config');
+const config = require('../../../../config');
 
 const app = express();
 const PORT = config.ports.analysis;
