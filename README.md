@@ -1,32 +1,10 @@
-# RIEGO-SMART - Sistema Completo con Frontend
+# RIEGO-SMART - Sistema SOA con Microservicios
 
-## INICIO RAPIDO
+Sistema autocontenido SIN DEPENDENCIAS EXTERNAS. Todo funciona localmente.
 
-### 1. Configura MySQL en config.js
+## INSTALACION (SOLO 2 PASOS)
 
-```javascript
-user: 'root',
-password: 'root',  // o '' si no tienes password
-```
-
-### 2. Inicia MySQL
-
-```cmd
-docker-compose up -d mysql
-```
-
-O si tienes MySQL instalado, asegúrate que esté corriendo.
-
-### 3. Crea las bases de datos
-
-```cmd
-mysql -u root -proot -e "CREATE DATABASE auth_service;"
-mysql -u root -proot -e "CREATE DATABASE sensor_service;"
-mysql -u root -proot -e "CREATE DATABASE analysis_service;"
-mysql -u root -proot -e "CREATE DATABASE notification_service;"
-```
-
-### 4. Instala dependencias
+### 1. Instala dependencias
 
 ```cmd
 cd backend\services\auth-service && npm install && cd ..\..\..
@@ -35,60 +13,57 @@ cd backend\services\analysis-service && npm install && cd ..\..\..
 cd backend\services\notification-service && npm install && cd ..\..\..
 ```
 
-### 5. Inicia los 4 servicios backend (4 terminales)
+### 2. Inicia los 4 servicios (4 terminales)
 
 ```cmd
-cd backend\services\auth-service && node src\app-simple.js
-cd backend\services\sensor-service && node src\app-simple.js
-cd backend\services\analysis-service && node src\app-simple.js
-cd backend\services\notification-service && node src\app-simple.js
+Terminal 1: cd backend\services\auth-service && node src\app-simple.js
+Terminal 2: cd backend\services\sensor-service && node src\app-simple.js
+Terminal 3: cd backend\services\analysis-service && node src\app-simple.js
+Terminal 4: cd backend\services\notification-service && node src\app-simple.js
 ```
 
-### 6. Abre el frontend
+### 3. Abre el frontend
 
-Abre el archivo `frontend/index.html` en tu navegador.
+Abre `frontend/index.html` en Chrome/Firefox
 
-## USO DEL SISTEMA
+## ARQUITECTURA
 
-### Primera vez:
-1. Haz click en "Registrarse"
-2. Ingresa email, password y nombre
-3. Después inicia sesión con esas credenciales
+### Microservicios (SOA)
+- **Auth Service** (Puerto 3000) - Autenticación JWT
+- **Sensor Service** (Puerto 3001) - Gestión de sensores y simulador
+- **Analysis Service** (Puerto 3002) - Análisis de datos y alertas
+- **Notification Service** (Puerto 3003) - Notificaciones SMS/Email
 
-### Crear sensores:
-1. Completa el formulario de "Crear Nuevo Sensor"
-2. Haz click en "Crear Sensor"
+### Comunicación
+- **HTTP/REST** - Cada servicio expone APIs REST
+- **Sin Message Broker** - Comunicación directa entre servicios
 
-### Simular datos:
-1. En tu sensor, haz click en "Simular Lectura"
-2. Esto generará datos automáticos
-3. Si la humedad es baja, se creará una alerta
+### Base de Datos
+- **SQLite** - Cada servicio tiene su propia BD local en archivo
+- **Sin configuración** - Se crea automáticamente
+- **Sin credenciales** - No requiere usuario/password
 
-### Ver alertas y notificaciones:
-1. Usa las pestañas superiores
-2. Las alertas se generan automáticamente cuando la humedad está fuera de los umbrales
-3. Las notificaciones se envían automáticamente (simuladas)
+## CARACTERISTICAS
 
-## ESTRUCTURA
+✅ Sin Docker
+✅ Sin MySQL/PostgreSQL
+✅ Sin problemas de credenciales
+✅ Sin configuración manual
+✅ Todo automático
+✅ Simulador de sensores incluido
+✅ Frontend web incluido
 
-```
-frontend/
-  index.html  - Interfaz web
-  app.js      - Lógica del frontend
+## USO
 
-backend/
-  services/
-    auth-service/      - Puerto 3000
-    sensor-service/    - Puerto 3001
-    analysis-service/  - Puerto 3002
-    notification-service/ - Puerto 3003
+1. Registrate en el frontend
+2. Crea sensores
+3. Simula lecturas
+4. Ve alertas y notificaciones
 
-config.js - Configuración única
-```
+Las bases de datos se crean automáticamente en:
+- `backend/services/auth-service/database.sqlite`
+- `backend/services/sensor-service/database.sqlite`
+- `backend/services/analysis-service/database.sqlite`
+- `backend/services/notification-service/database.sqlite`
 
-## NOTAS
-
-- El frontend se conecta a los 4 backends automáticamente
-- Todos los datos se guardan en MySQL
-- El sistema simula sensores sin hardware real
-- Las notificaciones son simuladas (SMS/Email)
+Todo funciona sin configuración adicional.

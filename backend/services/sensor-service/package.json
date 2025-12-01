@@ -1,7 +1,6 @@
 {
-  "name": "riego-smart-sensor-service",
+  "name": "sensor-service",
   "version": "1.0.0",
-  "description": "Servicio de sensores",
   "main": "src/app-simple.js",
   "scripts": {
     "start": "node src/app-simple.js"
@@ -9,10 +8,9 @@
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "sequelize": "^6.35.1",
-    "mysql2": "^3.6.5",
     "jsonwebtoken": "^9.0.2",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "sequelize": "^6.35.1",
+    "sqlite3": "^5.1.7"
   }
 }

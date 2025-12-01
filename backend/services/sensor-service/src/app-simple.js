@@ -3,25 +3,20 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const config = require('../../../config');
+const path = require('path');
 
 const app = express();
-const PORT = config.ports.sensor;
+const PORT = 3001;
+const JWT_SECRET = 'riego_smart_secret_2024';
 
 app.use(cors());
 app.use(express.json());
 
-const sequelize = new Sequelize(
-  config.database.databases.sensor,
-  config.database.user,
-  config.database.password,
-  {
-    host: config.database.host,
-    port: config.database.port,
-    dialect: 'mysql',
-    logging: false
-  }
-);
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, '../database.sqlite'),
+  logging: false
+});
 
 const Sensor = sequelize.define('Sensor', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
@@ -45,7 +40,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, config.jwtSecret);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
@@ -98,7 +93,7 @@ app.post('/api/sensores/:id/simular', authenticate, async (req, res) => {
     const dato = await SensorData.create({ sensorId: sensor.id, valor });
 
     try {
-      await axios.post('http://localhost:' + config.ports.analysis + '/api/analizar', {
+      await axios.post('http://localhost:3002/api/analizar', {
         sensorId: sensor.id,
         usuarioId: sensor.usuarioId,
         valor,
@@ -130,16 +125,16 @@ app.get('/api/sensores/:id/datos', authenticate, async (req, res) => {
   }
 });
 
-console.log('Conectando a:', config.database.databases.sensor);
+console.log('Iniciando Sensor Service...');
 sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a MySQL');
+    console.log('Base de datos SQLite lista');
     app.listen(PORT, () => {
       console.log('Sensor Service escuchando en puerto ' + PORT);
+      console.log('Base de datos: database.sqlite');
     });
   })
   .catch(err => {
     console.error('ERROR:', err.message);
-    console.error('Edita config.js o crea la BD');
     process.exit(1);
   });

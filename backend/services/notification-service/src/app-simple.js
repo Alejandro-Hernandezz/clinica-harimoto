@@ -2,25 +2,20 @@ const express = require('express');
 const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
-const config = require('../../../config');
+const path = require('path');
 
 const app = express();
-const PORT = config.ports.notification;
+const PORT = 3003;
+const JWT_SECRET = 'riego_smart_secret_2024';
 
 app.use(cors());
 app.use(express.json());
 
-const sequelize = new Sequelize(
-  config.database.databases.notification,
-  config.database.user,
-  config.database.password,
-  {
-    host: config.database.host,
-    port: config.database.port,
-    dialect: 'mysql',
-    logging: false
-  }
-);
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, '../database.sqlite'),
+  logging: false
+});
 
 const Notification = sequelize.define('Notification', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
@@ -37,7 +32,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, config.jwtSecret);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
@@ -92,12 +87,13 @@ app.get('/api/notificaciones', authenticate, async (req, res) => {
   }
 });
 
-console.log('Conectando a:', config.database.databases.notification);
+console.log('Iniciando Notification Service...');
 sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a MySQL');
+    console.log('Base de datos SQLite lista');
     app.listen(PORT, () => {
       console.log('Notification Service escuchando en puerto ' + PORT);
+      console.log('Base de datos: database.sqlite');
     });
   })
   .catch(err => {
