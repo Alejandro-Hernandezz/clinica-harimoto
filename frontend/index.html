@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIEGO-SMART - Sistema de Gestión de Riego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .auth-section, .main-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            margin-right: 0;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sensor-card, .alert-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .sensor-card h3, .alert-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .sensor-info, .alert-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .alert-high {
+            border-left-color: #dc3545;
+        }
+
+        .alert-medium {
+            border-left-color: #ffc107;
+        }
+
+        .success-msg, .error-msg {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 RIEGO-SMART</h1>
+            <p>Sistema Inteligente de Gestión de Riego Agrícola</p>
+        </div>
+
+        <!-- SECCION DE AUTENTICACION -->
+        <div id="authSection" class="auth-section">
+            <h2>Iniciar Sesión / Registrarse</h2>
+            <div id="authMessage"></div>
+
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="authEmail" placeholder="tu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="authPassword" placeholder="Tu password">
+            </div>
+
+            <div class="form-group" id="nombreGroup" class="hidden">
+                <label>Nombre:</label>
+                <input type="text" id="authNombre" placeholder="Tu nombre">
+            </div>
+
+            <button onclick="login()">Iniciar Sesión</button>
+            <button class="secondary" onclick="toggleRegister()">Registrarse</button>
+        </div>
+
+        <!-- SECCION PRINCIPAL -->
+        <div id="mainSection" class="main-section hidden">
+            <div class="user-info">
+                <div>
+                    <h2>Bienvenido, <span id="userName"></span></h2>
+                    <p id="userEmail"></p>
+                </div>
+                <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('sensores')">Mis Sensores</button>
+                <button class="tab" onclick="showTab('alertas')">Alertas</button>
+                <button class="tab" onclick="showTab('notificaciones')">Notificaciones</button>
+            </div>
+
+            <!-- TAB: SENSORES -->
+            <div id="sensoresTab" class="tab-content active">
+                <h3>Crear Nuevo Sensor</h3>
+                <div id="sensorMessage"></div>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" id="sensorNombre" placeholder="Ej: Sensor Parcela A">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo:</label>
+                        <select id="sensorTipo">
+                            <option value="HUMEDAD">Humedad</option>
+                            <option value="TEMPERATURA">Temperatura</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación:</label>
+                        <input type="text" id="sensorUbicacion" placeholder="Ej: Parcela A - Zona Norte">
+                    </div>
+                    <div class="form-group">
+                        <label>Umbral Mínimo:</label>
+                        <input type="number" id="sensorMin" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label>Umbral Máximo:</label>
+                        <input type="number" id="sensorMax" value="70">
+                    </div>
+                </div>
+
+                <button onclick="crearSensor()">Crear Sensor</button>
+
+                <hr style="margin: 30px 0;">
+
+                <h3>Mis Sensores</h3>
+                <button onclick="cargarSensores()">Actualizar Lista</button>
+                <div id="sensoresList"></div>
+            </div>
+
+            <!-- TAB: ALERTAS -->
+            <div id="alertasTab" class="tab-content">
+                <h3>Alertas del Sistema</h3>
+                <button onclick="cargarAlertas()">Actualizar Alertas</button>
+                <div id="alertasList"></div>
+            </div>
+
+            <!-- TAB: NOTIFICACIONES -->
+            <div id="notificacionesTab" class="tab-content">
+                <h3>Historial de Notificaciones</h3>
+                <button onclick="cargarNotificaciones()">Actualizar Notificaciones</button>
+                <div id="notificacionesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
