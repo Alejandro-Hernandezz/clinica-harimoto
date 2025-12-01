@@ -10,7 +10,6 @@ const PORT = config.ports.notification;
 app.use(cors());
 app.use(express.json());
 
-// BASE DE DATOS
 const sequelize = new Sequelize(
   config.database.databases.notification,
   config.database.user,
@@ -18,24 +17,22 @@ const sequelize = new Sequelize(
   {
     host: config.database.host,
     port: config.database.port,
-    dialect: 'postgres',
+    dialect: 'mysql',
     logging: false
   }
 );
 
-// MODELO
 const Notification = sequelize.define('Notification', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  usuarioId: { type: DataTypes.UUID, allowNull: false, field: 'usuario_id' },
-  alertaId: { type: DataTypes.UUID, allowNull: false, field: 'alerta_id' },
+  usuarioId: { type: DataTypes.UUID, allowNull: false },
+  alertaId: { type: DataTypes.UUID, allowNull: false },
   tipo: { type: DataTypes.STRING, allowNull: false },
   estado: { type: DataTypes.STRING, defaultValue: 'ENVIADA' },
   contenido: { type: DataTypes.TEXT, allowNull: false },
   intentos: { type: DataTypes.INTEGER, defaultValue: 1 },
-  respuestaServicio: { type: DataTypes.TEXT, field: 'respuesta_servicio' }
-}, { tableName: 'notifications' });
+  respuestaServicio: { type: DataTypes.TEXT }
+});
 
-// MIDDLEWARE AUTH
 const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -48,7 +45,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// RUTAS
 app.get('/health', (req, res) => {
   res.json({ success: true, service: 'notification-service', port: PORT });
 });
@@ -96,21 +92,15 @@ app.get('/api/notificaciones', authenticate, async (req, res) => {
   }
 });
 
-// INICIO
 console.log('Conectando a:', config.database.databases.notification);
-sequelize.authenticate()
+sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a BD');
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    console.log('BD sincronizada');
+    console.log('Conectado a MySQL');
     app.listen(PORT, () => {
       console.log('Notification Service escuchando en puerto ' + PORT);
     });
   })
   .catch(err => {
     console.error('ERROR:', err.message);
-    console.error('Edita config.js con tus credenciales');
     process.exit(1);
   });

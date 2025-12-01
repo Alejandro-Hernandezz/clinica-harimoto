@@ -11,7 +11,6 @@ const PORT = config.ports.sensor;
 app.use(cors());
 app.use(express.json());
 
-// BASE DE DATOS
 const sequelize = new Sequelize(
   config.database.databases.sensor,
   config.database.user,
@@ -19,31 +18,29 @@ const sequelize = new Sequelize(
   {
     host: config.database.host,
     port: config.database.port,
-    dialect: 'postgres',
+    dialect: 'mysql',
     logging: false
   }
 );
 
-// MODELOS
 const Sensor = sequelize.define('Sensor', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  usuarioId: { type: DataTypes.UUID, allowNull: false, field: 'usuario_id' },
+  usuarioId: { type: DataTypes.UUID, allowNull: false },
   nombre: { type: DataTypes.STRING, allowNull: false },
   tipo: { type: DataTypes.STRING, allowNull: false },
   ubicacion: { type: DataTypes.STRING, allowNull: false },
-  umbralMinimo: { type: DataTypes.FLOAT, field: 'umbral_minimo' },
-  umbralMaximo: { type: DataTypes.FLOAT, field: 'umbral_maximo' },
+  umbralMinimo: { type: DataTypes.FLOAT },
+  umbralMaximo: { type: DataTypes.FLOAT },
   activo: { type: DataTypes.BOOLEAN, defaultValue: true }
-}, { tableName: 'sensors' });
+});
 
 const SensorData = sequelize.define('SensorData', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  sensorId: { type: DataTypes.UUID, allowNull: false, field: 'sensor_id' },
+  sensorId: { type: DataTypes.UUID, allowNull: false },
   valor: { type: DataTypes.FLOAT, allowNull: false },
   timestamp: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
-}, { tableName: 'sensor_data', timestamps: false });
+}, { timestamps: false });
 
-// MIDDLEWARE AUTH
 const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -56,7 +53,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// SIMULADOR
 function generarHumedad(ultimo = 50) {
   const variacion = (Math.random() - 0.5) * 10;
   let nuevo = ultimo + variacion;
@@ -71,7 +67,6 @@ function generarTemperatura() {
   return Math.round((base + ruido) * 10) / 10;
 }
 
-// RUTAS
 app.get('/health', (req, res) => {
   res.json({ success: true, service: 'sensor-service', port: PORT });
 });
@@ -135,21 +130,16 @@ app.get('/api/sensores/:id/datos', authenticate, async (req, res) => {
   }
 });
 
-// INICIO
 console.log('Conectando a:', config.database.databases.sensor);
-sequelize.authenticate()
+sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a BD');
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    console.log('BD sincronizada');
+    console.log('Conectado a MySQL');
     app.listen(PORT, () => {
       console.log('Sensor Service escuchando en puerto ' + PORT);
     });
   })
   .catch(err => {
     console.error('ERROR:', err.message);
-    console.error('Edita config.js con tus credenciales');
+    console.error('Edita config.js o crea la BD');
     process.exit(1);
   });

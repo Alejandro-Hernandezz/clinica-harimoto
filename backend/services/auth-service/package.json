@@ -1,7 +1,7 @@
 {
   "name": "riego-smart-auth-service",
   "version": "1.0.0",
-  "description": "Servicio de autenticación para RIEGO-SMART",
+  "description": "Servicio de autenticacion",
   "main": "src/app-simple.js",
   "scripts": {
     "start": "node src/app-simple.js"
@@ -13,7 +13,6 @@
     "bcrypt": "^5.1.1",
     "jsonwebtoken": "^9.0.2",
     "sequelize": "^6.35.1",
-    "pg": "^8.11.3",
-    "pg-hstore": "^2.3.4"
+    "mysql2": "^3.6.5"
   }
 }

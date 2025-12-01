@@ -11,7 +11,6 @@ const PORT = config.ports.analysis;
 app.use(cors());
 app.use(express.json());
 
-// BASE DE DATOS
 const sequelize = new Sequelize(
   config.database.databases.analysis,
   config.database.user,
@@ -19,24 +18,22 @@ const sequelize = new Sequelize(
   {
     host: config.database.host,
     port: config.database.port,
-    dialect: 'postgres',
+    dialect: 'mysql',
     logging: false
   }
 );
 
-// MODELO
 const Alert = sequelize.define('Alert', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  sensorId: { type: DataTypes.UUID, allowNull: false, field: 'sensor_id' },
-  usuarioId: { type: DataTypes.UUID, allowNull: false, field: 'usuario_id' },
+  sensorId: { type: DataTypes.UUID, allowNull: false },
+  usuarioId: { type: DataTypes.UUID, allowNull: false },
   tipo: { type: DataTypes.STRING, allowNull: false },
   severidad: { type: DataTypes.STRING, allowNull: false },
   mensaje: { type: DataTypes.TEXT, allowNull: false },
   recomendacion: { type: DataTypes.TEXT },
   leido: { type: DataTypes.BOOLEAN, defaultValue: false }
-}, { tableName: 'alerts' });
+});
 
-// MIDDLEWARE AUTH
 const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -49,7 +46,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// RUTAS
 app.get('/health', (req, res) => {
   res.json({ success: true, service: 'analysis-service', port: PORT });
 });
@@ -119,21 +115,15 @@ app.put('/api/alertas/:id/leer', authenticate, async (req, res) => {
   }
 });
 
-// INICIO
 console.log('Conectando a:', config.database.databases.analysis);
-sequelize.authenticate()
+sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a BD');
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    console.log('BD sincronizada');
+    console.log('Conectado a MySQL');
     app.listen(PORT, () => {
       console.log('Analysis Service escuchando en puerto ' + PORT);
     });
   })
   .catch(err => {
     console.error('ERROR:', err.message);
-    console.error('Edita config.js con tus credenciales');
     process.exit(1);
   });
