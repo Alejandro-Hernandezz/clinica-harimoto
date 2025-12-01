@@ -1,42 +1,32 @@
-# RIEGO-SMART - Sistema con MySQL
+# RIEGO-SMART - Sistema Completo con Frontend
 
-## PASO 1: Edita config.js
+## INICIO RAPIDO
 
-Abre `config.js` y configura:
+### 1. Configura MySQL en config.js
+
 ```javascript
-user: 'root',        // Tu usuario MySQL (generalmente 'root')
-password: '',        // Tu password MySQL (puede estar vacio)
+user: 'root',
+password: 'root',  // o '' si no tienes password
 ```
 
-## PASO 2: Inicia MySQL
+### 2. Inicia MySQL
 
-Opcion A - Si tienes MySQL instalado localmente:
-Ya esta listo, solo verifica que este corriendo.
-
-Opcion B - Con Docker:
 ```cmd
 docker-compose up -d mysql
 ```
 
-## PASO 3: Crea las bases de datos
+O si tienes MySQL instalado, asegúrate que esté corriendo.
 
-Abre MySQL y ejecuta:
-```sql
-CREATE DATABASE auth_service;
-CREATE DATABASE sensor_service;
-CREATE DATABASE analysis_service;
-CREATE DATABASE notification_service;
-```
+### 3. Crea las bases de datos
 
-O desde CMD:
 ```cmd
-mysql -u root -p -e "CREATE DATABASE auth_service;"
-mysql -u root -p -e "CREATE DATABASE sensor_service;"
-mysql -u root -p -e "CREATE DATABASE analysis_service;"
-mysql -u root -p -e "CREATE DATABASE notification_service;"
+mysql -u root -proot -e "CREATE DATABASE auth_service;"
+mysql -u root -proot -e "CREATE DATABASE sensor_service;"
+mysql -u root -proot -e "CREATE DATABASE analysis_service;"
+mysql -u root -proot -e "CREATE DATABASE notification_service;"
 ```
 
-## PASO 4: Instala dependencias
+### 4. Instala dependencias
 
 ```cmd
 cd backend\services\auth-service && npm install && cd ..\..\..
@@ -45,29 +35,60 @@ cd backend\services\analysis-service && npm install && cd ..\..\..
 cd backend\services\notification-service && npm install && cd ..\..\..
 ```
 
-## PASO 5: Inicia los servicios
+### 5. Inicia los 4 servicios backend (4 terminales)
 
-Abre 4 terminales CMD:
-
-Terminal 1: `cd backend\services\auth-service && node src\app-simple.js`
-Terminal 2: `cd backend\services\sensor-service && node src\app-simple.js`
-Terminal 3: `cd backend\services\analysis-service && node src\app-simple.js`
-Terminal 4: `cd backend\services\notification-service && node src\app-simple.js`
-
-Debes ver en cada terminal:
-```
-Conectado a MySQL
-Auth/Sensor/Analysis/Notification Service escuchando en puerto XXXX
+```cmd
+cd backend\services\auth-service && node src\app-simple.js
+cd backend\services\sensor-service && node src\app-simple.js
+cd backend\services\analysis-service && node src\app-simple.js
+cd backend\services\notification-service && node src\app-simple.js
 ```
 
-## VENTAJAS DE MYSQL
+### 6. Abre el frontend
 
-- Sin problemas de autenticacion
-- Password puede estar vacio por defecto
-- Mas facil de configurar
-- Las tablas se crean automaticamente
+Abre el archivo `frontend/index.html` en tu navegador.
 
-## SI TIENES ERROR
+## USO DEL SISTEMA
 
-El unico error posible es credenciales incorrectas.
-Edita `config.js` con tu usuario/password real de MySQL.
+### Primera vez:
+1. Haz click en "Registrarse"
+2. Ingresa email, password y nombre
+3. Después inicia sesión con esas credenciales
+
+### Crear sensores:
+1. Completa el formulario de "Crear Nuevo Sensor"
+2. Haz click en "Crear Sensor"
+
+### Simular datos:
+1. En tu sensor, haz click en "Simular Lectura"
+2. Esto generará datos automáticos
+3. Si la humedad es baja, se creará una alerta
+
+### Ver alertas y notificaciones:
+1. Usa las pestañas superiores
+2. Las alertas se generan automáticamente cuando la humedad está fuera de los umbrales
+3. Las notificaciones se envían automáticamente (simuladas)
+
+## ESTRUCTURA
+
+```
+frontend/
+  index.html  - Interfaz web
+  app.js      - Lógica del frontend
+
+backend/
+  services/
+    auth-service/      - Puerto 3000
+    sensor-service/    - Puerto 3001
+    analysis-service/  - Puerto 3002
+    notification-service/ - Puerto 3003
+
+config.js - Configuración única
+```
+
+## NOTAS
+
+- El frontend se conecta a los 4 backends automáticamente
+- Todos los datos se guardan en MySQL
+- El sistema simula sensores sin hardware real
+- Las notificaciones son simuladas (SMS/Email)
