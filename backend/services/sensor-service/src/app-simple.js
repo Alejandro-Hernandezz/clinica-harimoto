@@ -49,9 +49,18 @@ const authenticate = (req, res, next) => {
 };
 
 function generarHumedad(ultimo = 50) {
-  const variacion = (Math.random() - 0.5) * 10;
-  let nuevo = ultimo + variacion;
-  return Math.max(20, Math.min(80, Math.round(nuevo * 10) / 10));
+  // Generar valores que produzcan alertas frecuentemente
+  const random = Math.random();
+  if (random < 0.4) {
+    // 40% de probabilidad: humedad BAJA (genera alerta RIEGO_NECESARIO)
+    return Math.round((15 + Math.random() * 15) * 10) / 10; // 15-30%
+  } else if (random < 0.7) {
+    // 30% de probabilidad: humedad ALTA (genera alerta EXCESO_HUMEDAD)
+    return Math.round((70 + Math.random() * 15) * 10) / 10; // 70-85%
+  } else {
+    // 30% de probabilidad: humedad normal (sin alerta)
+    return Math.round((40 + Math.random() * 20) * 10) / 10; // 40-60%
+  }
 }
 
 function generarTemperatura() {
