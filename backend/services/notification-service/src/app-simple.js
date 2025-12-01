@@ -2,20 +2,26 @@ const express = require('express');
 const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
+const config = require('../../../config');
 
 const app = express();
-const PORT = 3003;
+const PORT = config.ports.notification;
 
 app.use(cors());
 app.use(express.json());
 
 // BASE DE DATOS
-const sequelize = new Sequelize('notification_service', 'postgres', 'Adezito666', {
-  host: 'localhost',
-  port: 5432,
-  dialect: 'postgres',
-  logging: false
-});
+const sequelize = new Sequelize(
+  config.database.databases.notification,
+  config.database.user,
+  config.database.password,
+  {
+    host: config.database.host,
+    port: config.database.port,
+    dialect: 'postgres',
+    logging: false
+  }
+);
 
 // MODELO
 const Notification = sequelize.define('Notification', {
@@ -34,7 +40,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, 'riego_smart_secret_2024');
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
     next();
   } catch (error) {
@@ -91,6 +97,7 @@ app.get('/api/notificaciones', authenticate, async (req, res) => {
 });
 
 // INICIO
+console.log('Conectando a:', config.database.databases.notification);
 sequelize.authenticate()
   .then(() => {
     console.log('Conectado a BD');
@@ -103,6 +110,7 @@ sequelize.authenticate()
     });
   })
   .catch(err => {
-    console.error('Error:', err.message);
+    console.error('ERROR:', err.message);
+    console.error('Edita config.js con tus credenciales');
     process.exit(1);
   });

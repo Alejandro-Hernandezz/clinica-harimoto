@@ -3,20 +3,26 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const config = require('../../../config');
 
 const app = express();
-const PORT = 3002;
+const PORT = config.ports.analysis;
 
 app.use(cors());
 app.use(express.json());
 
 // BASE DE DATOS
-const sequelize = new Sequelize('analysis_service', 'postgres', 'Adezito666', {
-  host: 'localhost',
-  port: 5432,
-  dialect: 'postgres',
-  logging: false
-});
+const sequelize = new Sequelize(
+  config.database.databases.analysis,
+  config.database.user,
+  config.database.password,
+  {
+    host: config.database.host,
+    port: config.database.port,
+    dialect: 'postgres',
+    logging: false
+  }
+);
 
 // MODELO
 const Alert = sequelize.define('Alert', {
@@ -35,7 +41,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, 'riego_smart_secret_2024');
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
     next();
   } catch (error) {
@@ -53,38 +59,28 @@ app.post('/api/analizar', async (req, res) => {
     const { sensorId, usuarioId, valor, umbralMinimo, umbralMaximo, tipo, ubicacion } = req.body;
     let alerta = null;
 
-    // Regla 1: Riego necesario
     if (tipo === 'HUMEDAD' && valor < umbralMinimo) {
       alerta = await Alert.create({
-        sensorId,
-        usuarioId,
+        sensorId, usuarioId,
         tipo: 'RIEGO_NECESARIO',
         severidad: 'ALTA',
         mensaje: 'Humedad baja detectada en ' + ubicacion + ': ' + valor + '%',
         recomendacion: 'Activar sistema de riego inmediatamente'
       });
 
-      // Notificar
       try {
-        await axios.post('http://localhost:3003/api/notificar', {
+        await axios.post('http://localhost:' + config.ports.notification + '/api/notificar', {
           usuarioId,
-          alerta: {
-            id: alerta.id,
-            tipo: alerta.tipo,
-            severidad: alerta.severidad,
-            mensaje: alerta.mensaje
-          }
+          alerta: { id: alerta.id, tipo: alerta.tipo, severidad: alerta.severidad, mensaje: alerta.mensaje }
         });
       } catch (e) {
         console.log('Notification Service no disponible');
       }
     }
 
-    // Regla 2: Exceso de humedad
     if (tipo === 'HUMEDAD' && valor > umbralMaximo) {
       alerta = await Alert.create({
-        sensorId,
-        usuarioId,
+        sensorId, usuarioId,
         tipo: 'EXCESO_HUMEDAD',
         severidad: 'MEDIA',
         mensaje: 'Humedad alta detectada en ' + ubicacion + ': ' + valor + '%',
@@ -124,6 +120,7 @@ app.put('/api/alertas/:id/leer', authenticate, async (req, res) => {
 });
 
 // INICIO
+console.log('Conectando a:', config.database.databases.analysis);
 sequelize.authenticate()
   .then(() => {
     console.log('Conectado a BD');
@@ -136,6 +133,7 @@ sequelize.authenticate()
     });
   })
   .catch(err => {
-    console.error('Error:', err.message);
+    console.error('ERROR:', err.message);
+    console.error('Edita config.js con tus credenciales');
     process.exit(1);
   });

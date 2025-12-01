@@ -3,20 +3,26 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const config = require('../../../config');
 
 const app = express();
-const PORT = 3000;
+const PORT = config.ports.auth;
 
 app.use(cors());
 app.use(express.json());
 
-// BASE DE DATOS
-const sequelize = new Sequelize('auth_service', 'postgres', 'Adezito666', {
-  host: 'localhost',
-  port: 5432,
-  dialect: 'postgres',
-  logging: false
-});
+// BASE DE DATOS - Lee credenciales del config.js
+const sequelize = new Sequelize(
+  config.database.databases.auth,
+  config.database.user,
+  config.database.password,
+  {
+    host: config.database.host,
+    port: config.database.port,
+    dialect: 'postgres',
+    logging: false
+  }
+);
 
 // MODELO USER
 const User = sequelize.define('User', {
@@ -40,7 +46,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, 'riego_smart_secret_2024');
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
     next();
   } catch (error) {
@@ -70,7 +76,7 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: 'Credenciales invalidas' });
     }
-    const token = jwt.sign({ id: user.id, email: user.email }, 'riego_smart_secret_2024', { expiresIn: '24h' });
+    const token = jwt.sign({ id: user.id, email: user.email }, config.jwtSecret, { expiresIn: '24h' });
     res.json({ success: true, data: { token, user: { id: user.id, email: user.email, nombre: user.nombre } } });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -87,6 +93,12 @@ app.get('/api/auth/profile', authenticate, async (req, res) => {
 });
 
 // INICIO
+console.log('Intentando conectar a PostgreSQL...');
+console.log('Host:', config.database.host);
+console.log('Puerto:', config.database.port);
+console.log('Usuario:', config.database.user);
+console.log('Base de datos:', config.database.databases.auth);
+
 sequelize.authenticate()
   .then(() => {
     console.log('Conectado a BD');
@@ -99,6 +111,12 @@ sequelize.authenticate()
     });
   })
   .catch(err => {
-    console.error('Error:', err.message);
+    console.error('ERROR DE CONEXION:');
+    console.error('Mensaje:', err.message);
+    console.error('');
+    console.error('SOLUCION:');
+    console.error('1. Verifica que PostgreSQL este corriendo');
+    console.error('2. Edita el archivo config.js con tus credenciales correctas');
+    console.error('3. Asegura que la base de datos "' + config.database.databases.auth + '" exista');
     process.exit(1);
   });
