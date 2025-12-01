@@ -3,25 +3,20 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const config = require('../../../../config');
+const path = require('path');
 
 const app = express();
-const PORT = config.ports.analysis;
+const PORT = 3002;
+const JWT_SECRET = 'riego_smart_secret_2024';
 
 app.use(cors());
 app.use(express.json());
 
-const sequelize = new Sequelize(
-  config.database.databases.analysis,
-  config.database.user,
-  config.database.password,
-  {
-    host: config.database.host,
-    port: config.database.port,
-    dialect: 'mysql',
-    logging: false
-  }
-);
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, '../database.sqlite'),
+  logging: false
+});
 
 const Alert = sequelize.define('Alert', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
@@ -38,7 +33,7 @@ const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
-    const decoded = jwt.verify(token, config.jwtSecret);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
@@ -65,7 +60,7 @@ app.post('/api/analizar', async (req, res) => {
       });
 
       try {
-        await axios.post('http://localhost:' + config.ports.notification + '/api/notificar', {
+        await axios.post('http://localhost:3003/api/notificar', {
           usuarioId,
           alerta: { id: alerta.id, tipo: alerta.tipo, severidad: alerta.severidad, mensaje: alerta.mensaje }
         });
@@ -115,12 +110,13 @@ app.put('/api/alertas/:id/leer', authenticate, async (req, res) => {
   }
 });
 
-console.log('Conectando a:', config.database.databases.analysis);
+console.log('Iniciando Analysis Service...');
 sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Conectado a MySQL');
+    console.log('Base de datos SQLite lista');
     app.listen(PORT, () => {
       console.log('Analysis Service escuchando en puerto ' + PORT);
+      console.log('Base de datos: database.sqlite');
     });
   })
   .catch(err => {
